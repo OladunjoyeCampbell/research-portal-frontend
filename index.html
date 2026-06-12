@@ -140,10 +140,28 @@ tr:hover td{background:#f8fbff}
 .bottom-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap}
 @media print{body{padding:0;background:#fff}.topbar,.phase-strip,.topbar-btns,.actions,.bottom-nav,.prog-wrap,.hint-box,.misconception-box,.feedback-box{display:none!important}.main-card{box-shadow:none;border:none;padding:8px}.card{break-inside:avoid}}
 @media(max-width:640px){body{padding:10px}.main-card{padding:16px}.topbar{padding:14px 16px}.btn{flex:1}.welcome-hero h2{font-size:1.35rem}}
- @media (prefers-color-scheme: dark) {
-  :root{--bg:#0f172a;--card:#1e293b;--text:#f1f5f9;--muted:#94a3b8;--border:#334155;--soft:#1e293b}
-  body{background:linear-gradient(180deg,#0f172a,#1e293b)}
- } 
+@media (max-width: 640px) {
+  body { padding: 10px; }
+  .main-card { padding: 16px; }
+  .topbar { padding: 14px 16px; }
+  .btn { flex: 1; }
+  .welcome-hero h2 { font-size: 1.35rem; }
+} 
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --border: #334155;
+    --soft: #1e293b;
+  }
+  body {
+    background: linear-gradient(180deg, #0f172a, #1e293b);
+    color: var(--text);
+  }
+}
 </style>
 </head>
 <body>

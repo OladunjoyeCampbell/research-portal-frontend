@@ -138,6 +138,87 @@ tr:hover td{background:#f8fbff}
 .cert-box{background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:2px solid #bfdbfe;border-radius:20px;padding:24px;text-align:center;margin:20px 0}
 .cert-name{font-size:1.4rem;font-weight:900;color:var(--primary);margin:8px 0}
 .bottom-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap}
+/* ========== DARK MODE CLASS OVERRIDES ========== */
+.dark-mode {
+  --bg: #0f172a;
+  --card: #1e293b;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --border: #334155;
+  --soft: #1e293b;
+  --soft-warn: #2d2a1f;
+  --soft-ok: #1f2a1f;
+  --shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  --topbar-grad-start: #1e293b;
+  --topbar-grad-end: #0f172a;
+}
+
+.dark-mode body {
+  background: linear-gradient(180deg, #0f172a, #1e293b);
+}
+
+.dark-mode .topbar,
+.dark-mode .phase-strip,
+.dark-mode .main-card,
+.dark-mode .prog-wrap,
+.dark-mode .card,
+.dark-mode .option-btn,
+.dark-mode .prompt-box,
+.dark-mode .example-box,
+.dark-mode .consent-box,
+.dark-mode .pcode-box,
+.dark-mode .resume-stat,
+.dark-mode .study-step,
+.dark-mode .stat-card {
+  background: var(--card);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.dark-mode .card.study-card,
+.dark-mode .card.seq {
+  background: #0f172a;
+}
+
+.dark-mode .option-btn {
+  background: #0f172a;
+}
+
+.dark-mode .option-btn:hover {
+  background: #1e293b;
+}
+
+.dark-mode .code-block {
+  background: #020617;
+}
+
+.dark-mode .reflect-q {
+  background: #2d2a1f;
+  color: #fde68a;
+}
+
+.dark-mode .consent-check {
+  background: #1f2a1f;
+}
+
+.dark-mode .btn-secondary {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+.dark-mode .pill-gray {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+.dark-mode .phase-dot {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+.dark-mode .phase-dot.done {
+  background: #166534;
+}
 @media print{body{padding:0;background:#fff}.topbar,.phase-strip,.topbar-btns,.actions,.bottom-nav,.prog-wrap,.hint-box,.misconception-box,.feedback-box{display:none!important}.main-card{box-shadow:none;border:none;padding:8px}.card{break-inside:avoid}}
 @media(max-width:640px){body{padding:10px}.main-card{padding:16px}.topbar{padding:14px 16px}.btn{flex:1}.welcome-hero h2{font-size:1.35rem}}
 @media (max-width: 640px) {
@@ -234,6 +315,36 @@ function speak(text) {
     u.rate = 0.9;
     speechSynthesis.speak(u);
   } catch(e) { console.warn('Speech error', e); }
+}
+// ========== DARK MODE MANAGEMENT ==========
+function initDarkMode() {
+  const saved = localStorage.getItem('research_dark_mode');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const shouldBeDark = saved === 'enabled' || (saved === null && prefersDark);
+  if (shouldBeDark) {
+    document.documentElement.classList.add('dark-mode');
+  } else {
+    document.documentElement.classList.remove('dark-mode');
+  }
+  updateDarkModeButtonText();
+}
+
+function toggleDarkMode() {
+  if (document.documentElement.classList.contains('dark-mode')) {
+    document.documentElement.classList.remove('dark-mode');
+    localStorage.setItem('research_dark_mode', 'disabled');
+  } else {
+    document.documentElement.classList.add('dark-mode');
+    localStorage.setItem('research_dark_mode', 'enabled');
+  }
+  updateDarkModeButtonText();
+}
+
+function updateDarkModeButtonText() {
+  const btn = document.getElementById('btnDarkMode');
+  if (!btn) return;
+  const isDark = document.documentElement.classList.contains('dark-mode');
+  btn.innerHTML = isDark ? '☀️ Light' : '🌙 Dark';
 }
 function showSavedToast(msg) {
   const old = document.querySelector('.saved-toast');
@@ -477,6 +588,7 @@ function topbarHTML() {
     <div class="brand"><h1>🔬 Research Portal</h1><p>Multi‑study research participation hub</p></div>
     <div class="topbar-btns">
       <button class="pill ${S.audioOn?'pill-green':'pill-gray'}" id="btnAudio">${S.audioOn?'🔊':'🔇'} Audio</button>
+      <button class="pill pill-gray" id="btnDarkMode">🌙 Dark</button>
       ${S.phase !== 'welcome' && S.phase !== 'studySelect' && S.phase !== 'dashboard' && S.phase !== 'adminLogin' && S.currentStudyId ? `<button class="pill pill-amber" id="btnStudySelect">📚 All studies</button>` : ''}
       ${S.phase !== 'welcome' && S.phase !== 'dashboard' && S.phase !== 'adminLogin' ? `<button class="pill pill-amber" id="btnDash">📊 Dashboard</button>` : ''}
       ${S.studyConfig?.bilingual === true && (S.phase !== 'welcome' && S.phase !== 'studySelect' && S.phase !== 'adminLogin' && S.phase !== 'dashboard') ? `<button class="pill pill-blue" id="btnLangStudy">${S.studyLang === 'en' ? 'Hausa' : 'English'}</button>` : ''}
@@ -1399,8 +1511,13 @@ async function go() {
     default: html = '<div>Error</div>';
   }
   app.innerHTML = html;
+  
+  // Update dark mode button text after rendering
+  updateDarkModeButtonText();
+  
   // Global topbar buttons
   el('btnAudio')?.addEventListener('click',()=>{ S.audioOn = !S.audioOn; go(); });
+  el('btnDarkMode')?.addEventListener('click', () => toggleDarkMode());  // <-- Dark mode toggle
   el('btnStudySelect')?.addEventListener('click',()=>{ S.phase='studySelect'; go(); });
   el('btnDash')?.addEventListener('click',()=>{ S.prevPhase = S.phase; S.phase='adminLogin'; go(); });
   el('btnLangStudy')?.addEventListener('click',()=>{
@@ -1410,6 +1527,16 @@ async function go() {
       go();
     }
   });
+  el('btnWithdraw')?.addEventListener('click', async () => {
+    if(confirm('Are you sure? This will erase your progress and you cannot rejoin this study.')) {
+      await apiWithdraw(S.currentEnrolmentId);
+      localStorage.removeItem(`research_enrolment_${S.currentEnrolmentId}`);
+      S.phase = 'welcome';
+      go();
+    }
+  });
+  // ... (rest of your existing event listeners for other buttons remain unchanged)
+      }
   el('btnWithdraw')?.addEventListener('click', async () => {
     if(confirm('Are you sure? This will erase your progress and you cannot rejoin this study.')) {
       await apiWithdraw(S.currentEnrolmentId);
@@ -1472,7 +1599,7 @@ async function go() {
     default: break;
   }
 }
-window.addEventListener('DOMContentLoaded', () => { go(); });
+window.addEventListener('DOMContentLoaded', () => { initDarkMode(); go(); });
 </script>
 </body>
 </html>
